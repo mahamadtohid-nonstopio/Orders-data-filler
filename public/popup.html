@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ticket Order Autofill</title><link rel="stylesheet" href="style.css"></head>
+<body><header><span class="badge">TEST TOOLS</span><h1>Order autofill</h1><p id="site">Connecting to the current page…</p></header>
+<main>
+<label>Form profile<select id="profiles"><option value="">Set up a form to get started</option></select></label>
+<div class="row"><button id="setup">Set up this form</button><button id="edit">Edit profile</button></div>
+<section><label>Ticket number <span class="required">Required</span><input id="ticket" type="text" maxlength="120" placeholder="e.g. ESIN-001234" autocomplete="off"></label><p class="hint">Kept as text, including leading zeros. The same ticket uses the same synthetic names.</p>
+<div id="preview" class="preview">Enter your ticket to preview test data.</div>
+<button id="new">New Test Data</button><p class="hint">Creates new matching ACC / MRN numbers. To replace populated fields, enable overwrite.</p></section>
+<label class="inline"><input id="overwrite" type="checkbox">Overwrite existing text</label><p id="consentSummary">Configured consents will be set to Yes.</p>
+<label id="patientDefaultsRow" class="inline" hidden><input id="patientDefaults" type="checkbox" checked>Use synthetic DOB 01/01/1990 and gender Unknown for empty patient fields</label>
+<button id="fill" class="primary">Fill Order</button><p class="hint">Review the filled form and submit it manually.</p>
+<section id="results" aria-live="polite"></section>
+<details id="editor"><summary>Profile setup</summary><form id="profileForm">
+<label>Profile name<input id="profileName" required placeholder="UAT — Manual Order"></label>
+<label>Form workflow<select id="workflow"><option value="mapped">Mapped fields (current section)</option><option value="sas">SAS tabs: Patient → Test → Provider</option></select></label>
+<label>Exact origin<input id="origin" required placeholder="https://uat.example.com"></label>
+<label>Order route<input id="route" required placeholder="/orders/new"></label>
+<label class="inline"><input id="descendants" type="checkbox">Also allow child paths (slash boundary)</label>
+<label>Form or section CSS selector<input id="scope" required value="form" placeholder="#patient-order"></label>
+<button id="scan" type="button">Scan fields</button><p id="mappingHint" class="hint">Suggestions use labels and field metadata. Confirm the intended patient section.</p>
+<div id="mappings"></div>
+<div id="mappedConsents">
+<h2>Consent mappings</h2><p class="hint">Add only the groups you want set to Yes. Group selector is relative to the form; Yes selector is relative to the group.</p>
+<div id="consents"></div><button id="addConsent" type="button">Add consent group</button>
+</div>
+<div class="row"><label>Name prefix<input id="prefix" value="Test"></label><label>Maximum name length<input id="maxLength" type="number" min="8" max="100" value="30"></label></div>
+<label class="inline"><input id="defaultOverwrite" type="checkbox">Overwrite text by default for this profile</label>
+<div class="row"><button id="check" type="button">Check Mapping</button><button type="submit" class="primary">Save profile</button></div>
+<button id="delete" type="button" class="danger">Delete this profile</button>
+</form></details>
+</main><script src="popup.js"></script></body></html>

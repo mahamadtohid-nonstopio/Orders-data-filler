@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>SAS workflow test form</title>
+<style>
+body{font:16px system-ui;margin:0;color:#203154;background:#f6f7f9}header{padding:24px;background:#dab6e4}main{padding:28px;max-width:1200px;margin:auto;background:white}nav{display:flex;gap:16px;border-bottom:2px solid #ddd;padding:18px 0}button{padding:12px 20px;border:0;border-radius:4px;background:#2a408d;color:white;cursor:pointer}button:disabled{opacity:.4}section{padding:24px 0}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}.field{margin:14px 0}label{display:block;margin:8px 0}input,select,ng-select{box-sizing:border-box;width:100%;padding:12px;border:1px solid #bcc2cc;border-radius:4px;background:white}input[type=radio],input[type=checkbox]{width:auto}fieldset{border:1px solid #cbd1db;margin:24px 0}fieldset label{display:inline-block;margin-right:20px}ng-select{display:block;position:relative;padding:0}ng-select input{border:0}[role=listbox]{position:absolute;z-index:5;background:white;box-shadow:0 4px 12px #888;min-width:250px}[role=option]{padding:12px;cursor:pointer}.ng-value-label{display:block;padding:12px}.ng-value-label:empty{display:none}table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:16px;border-bottom:1px solid #ddd}[hidden]{display:none!important}.test-search{position:relative}
+</style></head><body><header>SAMPLE ACCESSIONING SYSTEM — LOCAL TEST FIXTURE</header><main>
+<h1>Create new order</h1><button id="create">Create Order</button><span id="submission">No submission</span>
+<nav><button role="tab" data-tab="patient">PATIENT INFORMATION</button><button role="tab" data-tab="test">TEST INFORMATION</button><button role="tab" data-tab="provider">PROVIDER INFORMATION</button><button role="tab" data-tab="documents">DOCUMENTS</button></nav>
+<section id="patient"><div class="grid">
+<div class="field"><input id="last" placeholder="Last Name *"></div><div class="field"><input id="first" placeholder="First Name *"></div>
+<div class="field"><label for="dob">Date of Birth *</label><input id="dob" type="date"></div></div>
+<fieldset><legend>Patient Gender: *</legend><label><input type="radio" name="gender" value="Male">Male</label><label><input type="radio" name="gender" value="Female">Female</label><label><input type="radio" name="gender" value="Unknown">Unknown</label></fieldset>
+<div class="grid"><input id="acc" placeholder="AccessionNumber"><input id="mrn" placeholder="Medical Reference Number"><input placeholder="Patient Family Number"></div></section>
+<section id="test" hidden><div class="grid"><div class="field"><label>Sample Type *</label><ng-select data-options="Blood,Saliva" data-label="Sample Type"></ng-select></div>
+<div class="field"><label for="tubes">Number of Tubes *</label><input id="tubes" type="number" min="1" placeholder="Enter no of tubes"></div>
+<div class="field"><label for="quantity">Sample Quantity</label><input id="quantity" type="number" min="0" placeholder="Enter sample quantity"></div>
+<div class="field"><label for="date">Sample Date *</label><input id="date" type="date"></div></div>
+<div class="test-search"><input id="testcode" role="combobox" aria-autocomplete="list" aria-controls="test-options" placeholder="Client Test Code/Test Code/Test Name/Hospital Code"><div id="test-options" role="listbox" hidden></div></div>
+<label><input id="sequential" type="checkbox">Sequential Test Req?</label><label>Comments<input placeholder="Add Comment/note here..."></label>
+<button id="add" disabled>ADD SAMPLETYPE <svg aria-hidden="true"></svg></button>
+<table id="samples"><thead><tr><th>Sample</th><th>Test code</th><th>Tubes</th><th>Quantity</th><th>Date</th></tr></thead><tbody></tbody></table>
+<div class="field"><label>Bill Type *</label><ng-select data-options="Self,Insurance" data-label="Bill Type"></ng-select></div>
+<fieldset><legend>Consent for Testing *</legend><label><input type="radio" name="consent" value="yes">Yes</label><label><input type="radio" name="consent" value="no">No</label></fieldset>
+<fieldset><legend>Use of Data *</legend><label><input type="radio" name="data" value="in">Opt In</label><label><input type="radio" name="data" value="out">Opt Out</label></fieldset>
+<label><input id="retention" type="checkbox">Opt-in for NY Sample Retention</label></section>
+<section id="provider" hidden><h2>Provider Search</h2><div class="grid"><div class="field"><label>Institution Code</label><ng-select data-options="TCHE,OTHER" data-label="Institution Code"></ng-select></div><div class="field"><label>Institution Name</label><select disabled><option>Search by name</option></select></div></div>
+<div class="grid"><div class="field"><label for="provider-first">First Name</label><input id="provider-first"></div><div class="field"><label for="provider-last">Last Name</label><input id="provider-last"></div><div class="field"><label for="npi">NPI</label><input id="npi"></div></div>
+<button id="search">SEARCH <svg aria-hidden="true"></svg></button><h2>Search Results</h2><table id="providers"><thead><tr><th>Name</th><th>Institution</th><th>Action</th></tr></thead><tbody></tbody></table>
+<div><h2>Selected Providers</h2><table id="selected"><tbody></tbody></table></div></section><section id="documents" hidden>Documents</section>
+</main><script>
+const $ = id => document.getElementById(id);
+window.fixture = { adds: 0, searches: 0, selections: 0, events: [], tabVisits: [] };
+document.querySelectorAll('[data-tab]').forEach(tab => tab.onclick = () => {
+  fixture.tabVisits.push(tab.dataset.tab);
+  document.querySelectorAll('main > section').forEach(s => s.hidden = s.id !== tab.dataset.tab);
+  document.querySelectorAll('[role=tab]').forEach(t => t.setAttribute('aria-selected', String(t === tab)));
+});
+document.querySelectorAll('ng-select').forEach((el, index) => {
+  el.innerHTML = '<span class="ng-value-label"></span><div class="ng-select-container"><input role="combobox" aria-label="'+el.dataset.label+'" aria-expanded="false" aria-controls="options-'+index+'"></div><div role="listbox" id="options-'+index+'" hidden></div>';
+  const input = el.querySelector('input'), panel = el.querySelector('[role=listbox]'), value = el.querySelector('.ng-value-label');
+  let pendingRender;
+  const render = () => {
+    panel.replaceChildren(); panel.hidden = false; input.setAttribute('aria-expanded', 'true');
+    for(const name of el.dataset.options.split(',').filter(n => n.toLowerCase().includes(input.value.toLowerCase()))) {
+      const option = document.createElement('div'); option.setAttribute('role','option'); option.textContent=name;
+      option.onclick = () => { clearTimeout(pendingRender); el.dataset.value=name; value.textContent=name; input.value=''; panel.hidden=true; input.setAttribute('aria-expanded','false'); updateAdd(); }; panel.append(option);
+    }
+  };
+  el.querySelector('.ng-select-container').onclick = render;
+  input.oninput = () => { clearTimeout(pendingRender); pendingRender=setTimeout(render, 140); };
+});
+function updateAdd() { $('add').disabled = !document.querySelector('ng-select[data-label="Sample Type"]').dataset.value || !$('tubes').value || !$('quantity').value || !$('date').value || !$('testcode').dataset.selected; }
+for(const id of ['tubes','quantity','date']) $(id).addEventListener('input', updateAdd);
+$('testcode').addEventListener('input', () => {
+  delete $('testcode').dataset.selected; updateAdd();
+  setTimeout(() => {
+    $('test-options').hidden=false; $('test-options').innerHTML='<div role="option">1500 - Synthetic test panel</div>';
+    $('test-options').firstChild.onclick=()=>{ $('testcode').value='1500 - Synthetic test panel'; $('testcode').dataset.selected='1500'; $('test-options').hidden=true; updateAdd(); };
+  },180);
+});
+$('add').onclick=()=>{
+  fixture.adds++; fixture.events.push('add');
+  const row=document.createElement('tr');
+  for(const value of ['Blood','1500',$('tubes').value,$('quantity').value,$('date').value]) { const cell=document.createElement('td'); cell.textContent=value; row.append(cell); }
+  setTimeout(()=>{$('samples').tBodies[0].append(row); $('testcode').value=''; delete $('testcode').dataset.selected; updateAdd();},180);
+};
+$('search').onclick=()=>{
+  fixture.searches++; fixture.events.push('search'); $('providers').tBodies[0].replaceChildren();
+  setTimeout(()=>{
+    for(const name of ['Synthetic Provider A','Synthetic Provider B','Synthetic Provider C','Synthetic Provider D']) {
+      const row=document.createElement('tr');row.innerHTML='<td>'+name+'</td><td>TCHE</td><td><button>Select</button></td>';
+      row.querySelector('button').onclick=()=>{fixture.selections++; fixture.events.push('select'); const copy=row.cloneNode(true);copy.querySelector('button').textContent='Remove';$('selected').tBodies[0].append(copy);row.remove();};
+      $('providers').tBodies[0].append(row);
+    }
+  },220);
+};
+$('create').onclick=()=>{$('submission').textContent='Submitted';};
+</script></body></html>

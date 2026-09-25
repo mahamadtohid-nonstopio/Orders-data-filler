@@ -1,0 +1,23 @@
+{
+  "name": "ticket-order-autofill",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "demo": "node scripts/demo.mjs",
+    "smoke": "node scripts/smoke.mjs && node scripts/smoke-sas.mjs"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.0",
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.25.0",
+    "jsdom": "^26.0.0",
+    "@types/jsdom": "^21.1.7",
+    "playwright": "^1.55.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}

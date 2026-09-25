@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "Ticket Order Autofill",
+  "description": "Fill configured test order forms with ticket-linked synthetic data.",
+  "version": "1.0.0",
+  "minimum_chrome_version": "120",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "action": { "default_popup": "popup.html", "default_title": "Fill test order" }
+}
